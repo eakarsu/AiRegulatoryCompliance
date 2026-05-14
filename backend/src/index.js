@@ -122,3 +122,21 @@ const startServer = async () => {
 };
 
 startServer();
+
+// AI feature mount: continuous-monitor
+app.use('/api/ai/continuous-monitor', require('./routes/ai-continuous-monitor'));
+// === Batch 07 Gaps & Frontend Mounts ===
+app.use('/api/gap-no-compliancegapfinder-against-selected-fram', require('./routes/gap-no-compliancegapfinder-against-selected-fram'));
+app.use('/api/gap-no-vendorriskscorer-thirdparty-risk-ai', require('./routes/gap-no-vendorriskscorer-thirdparty-risk-ai'));
+app.use('/api/gap-no-policyconflictdetector-crosspolicy-contra', require('./routes/gap-no-policyconflictdetector-crosspolicy-contra'));
+app.use('/api/gap-no-controleffectivenessassessment', require('./routes/gap-no-controleffectivenessassessment'));
+app.use('/api/gap-no-remediationplanner-ai', require('./routes/gap-no-remediationplanner-ai'));
+app.use('/api/gap-no-boardreadinessreport-exec-summary', require('./routes/gap-no-boardreadinessreport-exec-summary'));
+app.use('/api/gap-limited-workflow-automation-action-assignmen', require('./routes/gap-limited-workflow-automation-action-assignmen'));
+app.use('/api/gap-no-dlpcasb-integrations', require('./routes/gap-no-dlpcasb-integrations'));
+app.use('/api/gap-no-policy-version-control-approval-workflow', require('./routes/gap-no-policy-version-control-approval-workflow'));
+app.use('/api/gap-no-compliance-calendar-autotrack-regulatory', require('./routes/gap-no-compliance-calendar-autotrack-regulatory'));
+app.use('/api/gap-no-incident-response-playbooks', require('./routes/gap-no-incident-response-playbooks'));
+app.use('/api/gap-no-public-webhook-for-siem-ingestion', require('./routes/gap-no-public-webhook-for-siem-ingestion'));
+app.use('/api/gap-no-esignature-integration-for-attestations', require('./routes/gap-no-esignature-integration-for-attestations'));
+// === End Batch 07 ===

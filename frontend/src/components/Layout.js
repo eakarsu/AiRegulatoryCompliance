@@ -55,6 +55,9 @@ const Layout = ({ children }) => {
     { to: '/training-tracker', icon: BookMarked, label: 'AI Training Tracker' },
     { to: '/privacy-policy-generator', icon: FileCheck, label: 'AI Privacy Policy' },
     { to: '/compliance-checker', icon: Scale, label: 'AI Compliance Checker' },
+    { to: '/policy-conflict-detector', icon: Scale, label: 'AI Policy Conflict Detector' },
+    { to: '/control-effectiveness-assessment', icon: ClipboardCheck, label: 'AI Control Effectiveness' },
+    { to: '/board-readiness-report', icon: BarChart3, label: 'AI Board Readiness' },
   ];
 
   const secondaryNavItems = [

@@ -185,6 +185,123 @@ router.post('/generate-training', authMiddleware, async (req, res) => {
   }
 });
 
+// Compliance gap finder
+router.post('/compliance-gap-finder', authMiddleware, async (req, res) => {
+  try {
+    const { frameworkName, currentControls, scope } = req.body;
+    if (!frameworkName) return res.status(400).json({ error: 'frameworkName is required' });
+    const result = await aiService.complianceGapFinder(frameworkName, currentControls || [], scope || '');
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['compliance_gap', JSON.stringify({ frameworkName, scope }), JSON.stringify(result), 'openai/gpt-4o-mini', 2000, req.user.id]
+    );
+    res.json({ result });
+  } catch (error) {
+    console.error('AI compliance gap error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
+// Vendor risk scorer
+router.post('/vendor-risk-scorer', authMiddleware, async (req, res) => {
+  try {
+    const { vendorData } = req.body;
+    if (!vendorData) return res.status(400).json({ error: 'vendorData is required' });
+    const result = await aiService.vendorRiskScorer(vendorData);
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['vendor_risk_score', JSON.stringify(vendorData), JSON.stringify(result), 'openai/gpt-4o-mini', 1200, req.user.id]
+    );
+    res.json({ result });
+  } catch (error) {
+    console.error('AI vendor risk score error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
+// Remediation planner
+router.post('/remediation-planner', authMiddleware, async (req, res) => {
+  try {
+    const { violationData, constraints } = req.body;
+    if (!violationData) return res.status(400).json({ error: 'violationData is required' });
+    const result = await aiService.remediationPlanner(violationData, constraints || {});
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['remediation_plan', JSON.stringify({ violationData, constraints }), JSON.stringify(result), 'openai/gpt-4o-mini', 1500, req.user.id]
+    );
+    res.json({ result });
+  } catch (error) {
+    console.error('AI remediation planner error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
+// Policy conflict detector
+router.post('/policy-conflict-detector', authMiddleware, async (req, res) => {
+  try {
+    const { policies, scope } = req.body;
+    if (!policies || !Array.isArray(policies) || policies.length < 2) {
+      return res.status(400).json({ error: 'policies must be an array of at least 2 entries' });
+    }
+    const result = await aiService.policyConflictDetector(policies, scope || '');
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['policy_conflict_detection', JSON.stringify({ scope, policy_count: policies.length }), JSON.stringify(result), 'openai/gpt-4o-mini', 1800, req.user.id]
+    ).catch(() => null);
+    res.json({ result });
+  } catch (error) {
+    if (error && error.code === 'NO_AI_KEY') {
+      return res.status(503).json({ error: 'AI service unavailable: OPENROUTER_API_KEY not configured' });
+    }
+    console.error('AI policy conflict detector error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
+// Control effectiveness assessment
+router.post('/control-effectiveness-assessment', authMiddleware, async (req, res) => {
+  try {
+    const { controls, evidenceContext } = req.body;
+    if (!controls || !Array.isArray(controls) || controls.length === 0) {
+      return res.status(400).json({ error: 'controls must be a non-empty array' });
+    }
+    const result = await aiService.controlEffectivenessAssessment(controls, evidenceContext || '');
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['control_effectiveness', JSON.stringify({ control_count: controls.length }), JSON.stringify(result), 'openai/gpt-4o-mini', 1800, req.user.id]
+    ).catch(() => null);
+    res.json({ result });
+  } catch (error) {
+    if (error && error.code === 'NO_AI_KEY') {
+      return res.status(503).json({ error: 'AI service unavailable: OPENROUTER_API_KEY not configured' });
+    }
+    console.error('AI control effectiveness error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
+// Board readiness report
+router.post('/board-readiness-report', authMiddleware, async (req, res) => {
+  try {
+    const { organizationData, period } = req.body;
+    if (!organizationData) {
+      return res.status(400).json({ error: 'organizationData is required' });
+    }
+    const result = await aiService.boardReadinessReport(organizationData, period || '');
+    await pool.query(
+      'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+      ['board_readiness_report', JSON.stringify({ period }), JSON.stringify(result), 'openai/gpt-4o-mini', 2200, req.user.id]
+    ).catch(() => null);
+    res.json({ result });
+  } catch (error) {
+    if (error && error.code === 'NO_AI_KEY') {
+      return res.status(503).json({ error: 'AI service unavailable: OPENROUTER_API_KEY not configured' });
+    }
+    console.error('AI board readiness report error:', error);
+    res.status(500).json({ error: 'AI service error' });
+  }
+});
+
 // Get AI analysis history
 router.get('/history', authMiddleware, async (req, res) => {
   try {
