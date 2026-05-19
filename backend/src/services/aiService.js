@@ -628,6 +628,117 @@ Respond with ONLY a JSON object (no markdown formatting).`
 
     const response = await makeOpenRouterRequest(messages);
     return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Compliance gap finder - audit current state against a framework
+  complianceGapFinder: async (frameworkName, currentControls, scope) => {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a compliance gap analysis AI. Compare the organization's controls against a target framework and produce a JSON gap report. Respond with ONLY a valid JSON object: { framework, scope, summary, overall_score, gaps:[{control_id,description,current_state,required_state,severity,evidence_missing,remediation_owner_role}], satisfied:[{control_id,description,evidence}], partial:[{control_id,description,gap}], priority_order:[control_ids], next_steps:[] }.`
+      },
+      {
+        role: 'user',
+        content: `Framework: ${frameworkName}\nScope: ${scope || 'organization-wide'}\nCurrent Controls:\n${JSON.stringify(currentControls || [], null, 2)}\n\nProduce the gap report as JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Vendor risk scorer - structured numeric vendor risk score
+  vendorRiskScorer: async (vendorData) => {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a third-party risk management AI. Score the vendor and explain. Respond with ONLY a valid JSON object: { vendor_name, overall_risk_score:0-100, risk_band:"low|moderate|high|critical", dimension_scores:{security:0-100,privacy:0-100,operational:0-100,financial:0-100,compliance:0-100,reputational:0-100}, top_risks:[{risk,severity,evidence}], required_controls:[], questionnaire_followups:[], reassessment_interval_months, summary }.`
+      },
+      {
+        role: 'user',
+        content: `Vendor data:\n${JSON.stringify(vendorData || {}, null, 2)}\n\nReturn JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Remediation planner - convert a violation into actionable steps
+  remediationPlanner: async (violationData, constraints) => {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a compliance remediation planner. Given a violation, return a JSON plan: { violation_summary, root_cause_hypothesis, remediation_steps:[{step,owner_role,deadline_days,evidence_required,acceptance_criteria,priority}], short_term_mitigations:[], long_term_controls:[], dependencies:[], success_metrics:[], escalation_triggers:[] }. Respond with JSON only.`
+      },
+      {
+        role: 'user',
+        content: `Violation:\n${JSON.stringify(violationData || {}, null, 2)}\n\nConstraints:\n${JSON.stringify(constraints || {}, null, 2)}\n\nReturn JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Policy conflict detector - find overlapping/contradictory clauses across policies
+  policyConflictDetector: async (policies, scope) => {
+    if (!OPENROUTER_API_KEY) {
+      const err = new Error('OPENROUTER_API_KEY not configured');
+      err.code = 'NO_AI_KEY';
+      throw err;
+    }
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a policy conflict detection AI. Compare a set of organizational policies and surface conflicts, redundancies, and gaps. Respond with ONLY a valid JSON object: { scope, conflict_count, conflicts:[{type:"contradiction|redundancy|gap|ambiguity", policies_involved:[], topic, conflict_description, severity:"critical|high|medium|low", recommended_resolution, suggested_owner_role}], cross_reference_map:[{topic,policies:[]}], priority_resolutions:[], summary }.`
+      },
+      {
+        role: 'user',
+        content: `Scope: ${scope || 'organization-wide'}\nPolicies:\n${JSON.stringify(policies || [], null, 2)}\n\nReturn JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Control effectiveness assessment - rate implemented controls' real-world effectiveness
+  controlEffectivenessAssessment: async (controls, evidenceContext) => {
+    if (!OPENROUTER_API_KEY) {
+      const err = new Error('OPENROUTER_API_KEY not configured');
+      err.code = 'NO_AI_KEY';
+      throw err;
+    }
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a controls effectiveness analyst. Assess how well each implemented control actually mitigates its target risk based on its design, evidence, and operational record. Respond with ONLY a valid JSON object: { overall_effectiveness_score:0-100, control_assessments:[{control_id, control_name, design_effectiveness:0-100, operational_effectiveness:0-100, residual_risk:"low|moderate|high|critical", evidence_quality, gaps, improvement_recommendations:[], retest_frequency_days}], top_weaknesses:[], strongest_controls:[], summary }.`
+      },
+      {
+        role: 'user',
+        content: `Controls:\n${JSON.stringify(controls || [], null, 2)}\n\nEvidence / Operational Context:\n${evidenceContext || 'none provided'}\n\nReturn JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
+  },
+
+  // Board readiness report - executive-level compliance posture briefing
+  boardReadinessReport: async (organizationData, period) => {
+    if (!OPENROUTER_API_KEY) {
+      const err = new Error('OPENROUTER_API_KEY not configured');
+      err.code = 'NO_AI_KEY';
+      throw err;
+    }
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a compliance executive communications specialist. Produce a board-ready compliance briefing. Respond with ONLY a valid JSON object: { period, executive_summary, posture_rating:"strong|adequate|developing|at-risk|critical", key_metrics:[{name,value,trend:"up|down|flat",commentary}], top_risks:[{risk,impact,likelihood,owner,trend}], regulatory_exposure:[{regulation,status,deadline,blockers}], material_incidents:[], remediation_progress:[{initiative,owner,percent_complete,blockers}], decisions_required:[{topic,options,recommendation,deadline}], appendix_topics:[], summary }.`
+      },
+      {
+        role: 'user',
+        content: `Reporting Period: ${period || 'current quarter'}\nOrganization Data:\n${JSON.stringify(organizationData || {}, null, 2)}\n\nReturn JSON only.`
+      }
+    ];
+    const response = await makeOpenRouterRequest(messages);
+    return cleanAIResponse(response.choices[0].message.content);
   }
 };
 
