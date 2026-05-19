@@ -25,7 +25,8 @@ import {
   BookMarked,
   FileCheck,
   Scale,
-  Sparkles
+  Sparkles,
+  LineChart
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -58,6 +59,7 @@ const Layout = ({ children }) => {
     { to: '/policy-conflict-detector', icon: Scale, label: 'AI Policy Conflict Detector' },
     { to: '/control-effectiveness-assessment', icon: ClipboardCheck, label: 'AI Control Effectiveness' },
     { to: '/board-readiness-report', icon: BarChart3, label: 'AI Board Readiness' },
+    { to: '/custom-views', icon: LineChart, label: 'Compliance Views' },
   ];
 
   const secondaryNavItems = [

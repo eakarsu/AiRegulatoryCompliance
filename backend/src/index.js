@@ -87,6 +87,9 @@ app.use('/api/privacy-policy-generator', privacyPolicyGeneratorRoutes);
 app.use('/api/compliance-checker', complianceCheckerRoutes);
 app.use('/api/export', exportRoutes);
 
+// Custom Views (compliance score trend, regulation x BU heatmap, attestation PDF, control library CRUD)
+app.use('/api/custom-views', require('./routes/customViews'));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);

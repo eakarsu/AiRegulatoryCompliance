@@ -42,6 +42,9 @@ import BoardReadinessReport from './pages/BoardReadinessReport';
 import Layout from './components/Layout';
 import Profile from './pages/Profile';
 
+// Custom Views
+import CustomViewsPage from './pages/CustomViewsPage';
+
 // === Batch 07 Gaps & Frontend Mounts ===
 import CfContinuousComplianceMonitoring from './pages/CfContinuousComplianceMonitoring';
 import CfRemediationWorkflowAutomation from './pages/CfRemediationWorkflowAutomation';
@@ -123,7 +126,11 @@ function App() {
                 <Route path="/policy-conflict-detector" element={<PolicyConflictDetector />} />
                 <Route path="/control-effectiveness-assessment" element={<ControlEffectivenessAssessment />} />
                 <Route path="/board-readiness-report" element={<BoardReadinessReport />} />
-          // === Batch 07 Gaps & Frontend Mounts ===
+
+                {/* Custom Views */}
+                <Route path="/custom-views" element={<CustomViewsPage />} />
+
+          {/* === Batch 07 Gaps & Frontend Mounts === */}
           <Route path='/cf-continuous-compliance-monitoring' element={<CfContinuousComplianceMonitoring />} />
           <Route path='/cf-remediation-workflow-automation' element={<CfRemediationWorkflowAutomation />} />
           <Route path='/cf-aigenerated-audit-documentation' element={<CfAigeneratedAuditDocumentation />} />
@@ -143,7 +150,7 @@ function App() {
           <Route path='/gap-no-incident-response-playbooks' element={<GapNoIncidentResponsePlaybooks />} />
           <Route path='/gap-no-public-webhook-for-siem-ingestion' element={<GapNoPublicWebhookForSiemIngestion />} />
           <Route path='/gap-no-esignature-integration-for-attestations' element={<GapNoEsignatureIntegrationForAttestations />} />
-          // === End Batch 07 ===
+          {/* === End Batch 07 === */}
               </Routes>
             </Layout>
           </PrivateRoute>
