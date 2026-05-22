@@ -59,7 +59,24 @@ const Layout = ({ children }) => {
     { to: '/policy-conflict-detector', icon: Scale, label: 'AI Policy Conflict Detector' },
     { to: '/control-effectiveness-assessment', icon: ClipboardCheck, label: 'AI Control Effectiveness' },
     { to: '/board-readiness-report', icon: BarChart3, label: 'AI Board Readiness' },
+    { to: '/evidence-exception-tracker', icon: ClipboardCheck, label: 'Evidence Exceptions' },
     { to: '/custom-views', icon: LineChart, label: 'Compliance Views' },
+  ];
+
+  const gapFeatureNavItems = [
+    { to: '/gap-limited-workflow-automation-action-assignmen', icon: ClipboardCheck, label: 'Workflow Automation' },
+    { to: '/gap-no-boardreadinessreport-exec-summary', icon: BarChart3, label: 'Board Readiness Exec' },
+    { to: '/gap-no-compliance-calendar-autotrack-regulatory', icon: Calendar, label: 'Compliance Calendar' },
+    { to: '/gap-no-compliancegapfinder-against-selected-fram', icon: Scale, label: 'Gap Finder (Framework)' },
+    { to: '/gap-no-controleffectivenessassessment', icon: ClipboardCheck, label: 'Control Effectiveness' },
+    { to: '/gap-no-dlpcasb-integrations', icon: Shield, label: 'DLP/CASB Integrations' },
+    { to: '/gap-no-esignature-integration-for-attestations', icon: FileCheck, label: 'E-Signature Attestations' },
+    { to: '/gap-no-incident-response-playbooks', icon: AlertCircle, label: 'Incident Playbooks' },
+    { to: '/gap-no-policy-version-control-approval-workflow', icon: BookOpen, label: 'Policy Version Control' },
+    { to: '/gap-no-policyconflictdetector-crosspolicy-contra', icon: AlertTriangle, label: 'Policy Conflict Detector' },
+    { to: '/gap-no-public-webhook-for-siem-ingestion', icon: TrendingUp, label: 'SIEM Webhook' },
+    { to: '/gap-no-remediationplanner-ai', icon: Sparkles, label: 'AI Remediation Planner' },
+    { to: '/gap-no-vendorriskscorer-thirdparty-risk-ai', icon: Building2, label: 'Vendor Risk Scorer AI' },
   ];
 
   const secondaryNavItems = [
@@ -103,6 +120,23 @@ const Layout = ({ children }) => {
             </div>
             <ul className="sidebar-nav ai-features">
               {aiFeatureNavItems.map((item) => (
+                <li key={item.to}>
+                  <NavLink to={item.to} className={({ isActive }) => isActive ? 'active' : ''}>
+                    <item.icon size={20} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">
+              <Shield size={14} />
+              Gap Features
+            </div>
+            <ul className="sidebar-nav ai-features">
+              {gapFeatureNavItems.map((item) => (
                 <li key={item.to}>
                   <NavLink to={item.to} className={({ isActive }) => isActive ? 'active' : ''}>
                     <item.icon size={20} />

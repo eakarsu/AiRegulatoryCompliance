@@ -37,6 +37,7 @@ import RemediationPlanner from './pages/RemediationPlanner';
 import PolicyConflictDetector from './pages/PolicyConflictDetector';
 import ControlEffectivenessAssessment from './pages/ControlEffectivenessAssessment';
 import BoardReadinessReport from './pages/BoardReadinessReport';
+import EvidenceExceptionTracker from './pages/EvidenceExceptionTracker';
 
 // Components
 import Layout from './components/Layout';
@@ -65,6 +66,9 @@ import GapNoComplianceCalendarAutotrackRegulatory from './pages/GapNoComplianceC
 import GapNoIncidentResponsePlaybooks from './pages/GapNoIncidentResponsePlaybooks';
 import GapNoPublicWebhookForSiemIngestion from './pages/GapNoPublicWebhookForSiemIngestion';
 import GapNoEsignatureIntegrationForAttestations from './pages/GapNoEsignatureIntegrationForAttestations';
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
 // === End Batch 07 ===
 
 
@@ -85,6 +89,9 @@ const PrivateRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
+        <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
+        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -126,6 +133,7 @@ function App() {
                 <Route path="/policy-conflict-detector" element={<PolicyConflictDetector />} />
                 <Route path="/control-effectiveness-assessment" element={<ControlEffectivenessAssessment />} />
                 <Route path="/board-readiness-report" element={<BoardReadinessReport />} />
+                <Route path="/evidence-exception-tracker" element={<EvidenceExceptionTracker />} />
 
                 {/* Custom Views */}
                 <Route path="/custom-views" element={<CustomViewsPage />} />
