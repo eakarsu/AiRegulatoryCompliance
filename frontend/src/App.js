@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import MissingFeaturesHub from './pages/MissingFeaturesHub';
+import ProductionReadiness from './pages/ProductionReadiness';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -159,7 +161,9 @@ function App() {
           <Route path='/gap-no-public-webhook-for-siem-ingestion' element={<GapNoPublicWebhookForSiemIngestion />} />
           <Route path='/gap-no-esignature-integration-for-attestations' element={<GapNoEsignatureIntegrationForAttestations />} />
           {/* === End Batch 07 === */}
-              </Routes>
+                      <Route path="/missing-features" element={<MissingFeaturesHub />} />
+              <Route path="/production-readiness" element={<ProductionReadiness />} />
+      </Routes>
             </Layout>
           </PrivateRoute>
         }
