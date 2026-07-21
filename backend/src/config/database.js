@@ -1,13 +1,9 @@
 const { Pool } = require('pg');
+const fs = require('fs');
 require('dotenv').config({ path: '../.env' });
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'regulatory_compliance',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres123',
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL,
+  ssl: process.env.PGSSLROOTCERT ? { rejectUnauthorized: true, ca: fs.readFileSync(process.env.PGSSLROOTCERT, 'utf8') } : undefined });
 
 pool.on('connect', () => {
   console.log('Connected to PostgreSQL database');

@@ -30,9 +30,9 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { sub: String(user.id), id: user.id, email: user.email, role: user.role, tenantId: process.env.GOVERNANCE_TENANT_ID, subjectIds: [`user:${user.id}`] },
+      process.env.JWT_SECRET,
+      { algorithm: 'HS256', expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     // Log the login
@@ -87,9 +87,9 @@ router.post('/register', async (req, res) => {
     const user = result.rows[0];
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { sub: String(user.id), id: user.id, email: user.email, role: user.role, tenantId: process.env.GOVERNANCE_TENANT_ID, subjectIds: [`user:${user.id}`] },
+      process.env.JWT_SECRET,
+      { algorithm: 'HS256', expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     await pool.query(

@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const pool = require('./config/database');
 const { generalLimiter, authLimiter } = require('./middleware/rateLimit');
+const governanceRouter = require('../governance');
 
 // Import existing routes
 const authRoutes = require('./routes/auth');
@@ -37,6 +39,17 @@ const exportRoutes = require('./routes/export');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const signedAccess = (req, res, next) => {
+  const secret = process.env.JWT_SECRET || '';
+  const token = req.headers.authorization && req.headers.authorization.match(/^Bearer (.+)$/)?.[1];
+  if (secret.length < 32) return res.status(503).json({ error: 'secure JWT configuration required' });
+  try {
+    const claims = jwt.verify(token || '', secret, { algorithms: ['HS256'] });
+    if (!claims.tenantId || !claims.role || !Array.isArray(claims.subjectIds)) throw new Error('claims');
+    req.user = claims;
+    return next();
+  } catch (_) { return res.status(401).json({ error: 'signed tenant, role, and subject scope required' }); }
+};
 
 // Security & Middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -61,6 +74,8 @@ app.get('/api/health', (req, res) => {
 
 // Existing API Routes
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/governance', governanceRouter);
+app.use('/api', signedAccess);
 app.use('/api/regulations', regulationsRoutes);
 app.use('/api/compliance', complianceRoutes);
 app.use('/api/risks', risksRoutes);
@@ -87,28 +102,11 @@ app.use('/api/privacy-policy-generator', privacyPolicyGeneratorRoutes);
 app.use('/api/compliance-checker', complianceCheckerRoutes);
 app.use('/api/export', exportRoutes);
 
-// Custom Views (compliance score trend, regulation x BU heatmap, attestation PDF, control library CRUD)
-app.use('/api/custom-views', require('./routes/customViews'));
-
-// AI feature mount: continuous-monitor
-app.use('/api/ai/continuous-monitor', require('./routes/ai-continuous-monitor'));
-app.use('/api/evidence-exception-tracker', require('./routes/evidenceExceptionTracker'));
-
-// === Batch 07 Gaps & Frontend Mounts ===
-app.use('/api/gap-no-compliancegapfinder-against-selected-fram', require('./routes/gap-no-compliancegapfinder-against-selected-fram'));
-app.use('/api/gap-no-vendorriskscorer-thirdparty-risk-ai', require('./routes/gap-no-vendorriskscorer-thirdparty-risk-ai'));
-app.use('/api/gap-no-policyconflictdetector-crosspolicy-contra', require('./routes/gap-no-policyconflictdetector-crosspolicy-contra'));
-app.use('/api/gap-no-controleffectivenessassessment', require('./routes/gap-no-controleffectivenessassessment'));
-app.use('/api/gap-no-remediationplanner-ai', require('./routes/gap-no-remediationplanner-ai'));
-app.use('/api/gap-no-boardreadinessreport-exec-summary', require('./routes/gap-no-boardreadinessreport-exec-summary'));
-app.use('/api/gap-limited-workflow-automation-action-assignmen', require('./routes/gap-limited-workflow-automation-action-assignmen'));
-app.use('/api/gap-no-dlpcasb-integrations', require('./routes/gap-no-dlpcasb-integrations'));
-app.use('/api/gap-no-policy-version-control-approval-workflow', require('./routes/gap-no-policy-version-control-approval-workflow'));
-app.use('/api/gap-no-compliance-calendar-autotrack-regulatory', require('./routes/gap-no-compliance-calendar-autotrack-regulatory'));
-app.use('/api/gap-no-incident-response-playbooks', require('./routes/gap-no-incident-response-playbooks'));
-app.use('/api/gap-no-public-webhook-for-siem-ingestion', require('./routes/gap-no-public-webhook-for-siem-ingestion'));
-app.use('/api/gap-no-esignature-integration-for-attestations', require('./routes/gap-no-esignature-integration-for-attestations'));
-// === End Batch 07 ===
+if (process.env.ENABLE_GENERATED_FEATURES === 'true' && process.env.NODE_ENV !== 'production') {
+  app.use('/api/generated/custom-views', require('./routes/customViews'));
+  app.use('/api/generated/continuous-monitor', require('./routes/ai-continuous-monitor'));
+  app.use('/api/generated/evidence-exception-tracker', require('./routes/evidenceExceptionTracker'));
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -134,13 +132,8 @@ const startServer = async () => {
       console.log(`API available at http://localhost:${PORT}/api`);
     });
   } catch (error) {
-    console.error('Failed to connect to database:', error.message);
-    console.log('Server starting without database connection...');
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`API available at http://localhost:${PORT}/api`);
-    });
+    console.error('Failed to connect to database');
+    process.exitCode = 1;
   }
 };
 
