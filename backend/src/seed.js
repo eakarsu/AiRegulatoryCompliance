@@ -4,6 +4,12 @@ const initializeDatabase = require('./models/init');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
+function requireDemoPassword() {
+  const password = process.env.DEMO_PASSWORD || process.env.SEED_DEMO_PASSWORD || process.env.DEMO_SEED_PASSWORD || '';
+  if (password.length < 12 || password.length > 1024) throw new Error('DEMO_PASSWORD must contain 12-1024 characters');
+  return password;
+}
+
 const seedDatabase = async () => {
   console.log('Starting database seeding...');
 
@@ -25,7 +31,7 @@ const seedDatabase = async () => {
       `);
 
       // Seed Users (15 items)
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const hashedPassword = await bcrypt.hash(requireDemoPassword(), 10);
       const users = [
         ['admin@compliance.com', hashedPassword, 'Admin', 'User', 'admin'],
         ['john.smith@compliance.com', hashedPassword, 'John', 'Smith', 'compliance_officer'],
@@ -602,7 +608,7 @@ const seedDatabase = async () => {
       console.log('========================================');
       console.log('\nLogin credentials:');
       console.log('  Email:    admin@compliance.com');
-      console.log('  Password: password123');
+      console.log('Demo login users provisioned from the local environment.');
       console.log('\nSeeded data summary:');
       console.log('  - 15 Users');
       console.log('  - 15 Regulations');
