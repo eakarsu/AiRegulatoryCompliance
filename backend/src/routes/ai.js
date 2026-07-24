@@ -15,7 +15,7 @@ router.post('/chat', authMiddleware, async (req, res) => {
     // Log the AI interaction
     await pool.query(
       'INSERT INTO ai_analysis_history (analysis_type, input_data, output_data, model_used, tokens_used, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
-      ['chat', message, response, 'openai/gpt-4o-mini', 500, req.user.id]
+      ['chat', message, response, process.env.OPENROUTER_MODEL, 500, req.user.id]
     );
 
     res.json({ response });

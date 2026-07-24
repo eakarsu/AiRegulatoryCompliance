@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
@@ -119,6 +120,28 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
+const ensureConfiguredAdmin = async () => {
+  const email = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD || '';
+
+  if (!email && !password) return;
+  if (!email || password.length < 8) {
+    throw new Error('ADMIN_EMAIL and an ADMIN_PASSWORD of at least 8 characters are required together');
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await pool.query(
+    `INSERT INTO users (email, password, first_name, last_name, role, email_verified)
+     VALUES ($1, $2, 'Runtime', 'Administrator', 'admin', true)
+     ON CONFLICT (email) DO UPDATE SET
+       password = EXCLUDED.password,
+       role = 'admin',
+       email_verified = true,
+       updated_at = CURRENT_TIMESTAMP`,
+    [email, passwordHash]
+  );
+};
+
 // Test database connection and start server
 const startServer = async () => {
   try {
@@ -126,6 +149,7 @@ const startServer = async () => {
     const client = await pool.connect();
     console.log('Database connection successful');
     client.release();
+    await ensureConfiguredAdmin();
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
