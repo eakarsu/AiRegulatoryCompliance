@@ -109,6 +109,8 @@ if (process.env.ENABLE_GENERATED_FEATURES === 'true' && process.env.NODE_ENV !==
   app.use('/api/generated/evidence-exception-tracker', require('./routes/evidenceExceptionTracker'));
 }
 
+app.use('/api', require('./routes/generatedFeatures').router);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
