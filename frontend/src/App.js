@@ -92,8 +92,6 @@ function App() {
   return (
     <Routes>
         <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
-        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
-
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -139,6 +137,7 @@ function App() {
 
                 {/* Custom Views */}
                 <Route path="/custom-views" element={<CustomViewsPage />} />
+                <Route path="/codex/operations" element={<CodexOperationsFeature />} />
 
           {/* === Batch 07 Gaps & Frontend Mounts === */}
           <Route path='/cf-continuous-compliance-monitoring' element={<CfContinuousComplianceMonitoring />} />

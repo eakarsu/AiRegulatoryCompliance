@@ -61,6 +61,7 @@ const Layout = ({ children }) => {
     { to: '/board-readiness-report', icon: BarChart3, label: 'AI Board Readiness' },
     { to: '/evidence-exception-tracker', icon: ClipboardCheck, label: 'Evidence Exceptions' },
     { to: '/custom-views', icon: LineChart, label: 'Compliance Views' },
+    { to: '/codex/operations', icon: BarChart3, label: 'Decision Center' },
   ];
 
   const gapFeatureNavItems = [
