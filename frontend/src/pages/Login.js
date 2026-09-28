@@ -56,7 +56,7 @@ const Login = () => {
 
         <button type="button" className="btn demo-btn" onClick={handleDemoLogin}>
           <User size={18} />
-          Fill Demo Credentials
+          Auto Fill Demo Credentials
         </button>
 
         {error && (
