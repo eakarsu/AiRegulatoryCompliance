@@ -7,7 +7,7 @@ import Pagination from '../components/Pagination';
 import { TableSkeleton } from '../components/SkeletonLoader';
 import useFormValidation from '../hooks/useFormValidation';
 import DetailModal from '../components/DetailModal';
-import AIResultDisplay from '../components/AIResultDisplay';
+import AIReport from '../components/AIReport';
 
 // Component to display policy content beautifully
 const PolicyContentDisplay = ({ content }) => {
@@ -769,9 +769,9 @@ const PrivacyPolicyGenerator = () => {
                     <div className="spinner"></div>
                     <p>AI is generating your privacy policy...</p>
                   </div>
-                ) : generatedContent ? (
-                  <AIResultDisplay
-                    result={generatedContent}
+                ) : generatedContent !== null && generatedContent !== undefined ? (
+                  <AIReport
+                    response={generatedContent}
                     title="Generated Privacy Policy"
                     loading={false}
                   />

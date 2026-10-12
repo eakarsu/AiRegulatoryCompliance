@@ -1,9 +1,14 @@
+import AIReport from '../components/AIReport';
+
+import FullAIExamples, { useFullAIExamples } from "../components/FullAIExamples.jsx";
 import React, { useState } from 'react';
 import { Sparkles, AlertTriangle, Loader } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const RemediationPlanner = () => {
+  const fullAIExamples = useFullAIExamples();
+
   const [violation, setViolation] = useState('');
   const [framework, setFramework] = useState('');
   const [severity, setSeverity] = useState('high');
@@ -47,7 +52,7 @@ const RemediationPlanner = () => {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-full-ai-workspace="RemediationPlanner"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
           <div className="form-group">
             <label>Violation / finding</label>
             <textarea
@@ -56,7 +61,7 @@ const RemediationPlanner = () => {
               value={violation}
               onChange={(e) => setViolation(e.target.value)}
               placeholder="Describe the violation, who detected it, and the affected systems..."
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: violation, change: (e) => setViolation(e.target.value), label: "violation", manual: false, json: false, sample: '' }, "p1-1740", undefined)}
             />
           </div>
           <div className="form-group">
@@ -66,7 +71,7 @@ const RemediationPlanner = () => {
               className="form-input"
               value={framework}
               onChange={(e) => setFramework(e.target.value)}
-              placeholder="e.g. SOC 2, GDPR Art. 32, ISO 27001 A.12"
+              placeholder="e.g. SOC 2, GDPR Art. 32, ISO 27001 A.12" data-full-ai-field={fullAIExamples.bind({ current: framework, change: (e) => setFramework(e.target.value), label: "framework", manual: false, json: false, sample: '' }, "p1-2165", undefined)}
             />
           </div>
           <div className="form-group">
@@ -74,7 +79,7 @@ const RemediationPlanner = () => {
             <select
               className="form-input"
               value={severity}
-              onChange={(e) => setSeverity(e.target.value)}
+              onChange={(e) => setSeverity(e.target.value)} data-full-ai-field={fullAIExamples.bind({ current: severity, change: (e) => setSeverity(e.target.value), label: "severity", manual: false, json: false, sample: 'high' }, "p1-2516", undefined)}
             >
               <option value="critical">Critical</option>
               <option value="high">High</option>
@@ -89,7 +94,7 @@ const RemediationPlanner = () => {
               rows={3}
               value={orgContext}
               onChange={(e) => setOrgContext(e.target.value)}
-              placeholder="Industry, size, available resources..."
+              placeholder="Industry, size, available resources..." data-full-ai-field={fullAIExamples.bind({ current: orgContext, change: (e) => setOrgContext(e.target.value), label: "orgContext", manual: false, json: false, sample: '' }, "p1-3012", undefined)}
             />
           </div>
           {error && (
@@ -103,41 +108,7 @@ const RemediationPlanner = () => {
         </form>
       </div>
 
-      {result && (
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Remediation Plan</h2>
-          {result.summary && <p>{result.summary}</p>}
-
-          {Array.isArray(result.steps) && result.steps.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <h3>Steps</h3>
-              {result.steps.map((s, i) => (
-                <div key={i} style={{ padding: 10, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong>{i + 1}. {s.title || s.action || s.step || `Step ${i + 1}`}</strong>
-                    {s.deadline && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 12, background: '#dbeafe', color: '#1d4ed8' }}>by {s.deadline}</span>}
-                  </div>
-                  {s.description && <p style={{ marginTop: 4, color: '#4b5563' }}>{s.description}</p>}
-                  {s.owner && <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Owner: {s.owner}</p>}
-                  {s.priority && <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Priority: {s.priority}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {Array.isArray(result.mitigations) && result.mitigations.length > 0 && (
-            <SimpleList title="Interim Mitigations" items={result.mitigations} />
-          )}
-
-          {Array.isArray(result.success_metrics) && result.success_metrics.length > 0 && (
-            <SimpleList title="Success Metrics" items={result.success_metrics} />
-          )}
-
-          {Array.isArray(result.risks) && result.risks.length > 0 && (
-            <SimpleList title="Risks if Unaddressed" items={result.risks} />
-          )}
-        </div>
-      )}
+      {result !== null && result !== undefined && <AIReport response={result} title="Remediation Planner" />}
     </div>
   );
 };

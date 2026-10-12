@@ -1,8 +1,13 @@
+import NativeAIControls from "../components/NativeAIControls";
+import useNativeAIRequest from "../components/useNativeAIRequest";
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Trash2, FileText, AlertTriangle, Shield, BookOpen } from 'lucide-react';
 import { aiAPI } from '../services/api';
+import AIReport from '../components/AIReport';
 
 const AIAssistant = () => {
+  const nativeAIRequest = useNativeAIRequest();
+
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hello! I\'m your AI Compliance Assistant. I can help you with:\n\n- Understanding regulations (GDPR, CCPA, HIPAA, SOX, etc.)\n- Compliance best practices\n- Risk assessment guidance\n- Policy development\n- Incident response\n- Audit preparation\n\nHow can I assist you today?' }
   ]);
@@ -28,10 +33,10 @@ const AIAssistant = () => {
 
     try {
       const conversationHistory = messages.map(m => ({ role: m.role, content: m.content }));
-      const response = await aiAPI.chat(userMessage, conversationHistory);
+      const response = await nativeAIRequest.run((signal) => aiAPI.chat(userMessage, conversationHistory, { signal }));
       setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please check your OpenRouter API key in the .env file and try again.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: error.name === 'AbortError' ? 'Request canceled.' : error.response?.data?.error || error.message || 'The AI response could not be generated.' }]);
     } finally {
       setLoading(false);
     }
@@ -45,6 +50,8 @@ const AIAssistant = () => {
   };
 
   const handleClearChat = () => {
+    nativeAIRequest.cancel();
+    setLoading(false);
     setMessages([{ role: 'assistant', content: 'Chat cleared. How can I help you with compliance today?' }]);
   };
 
@@ -60,7 +67,7 @@ const AIAssistant = () => {
   };
 
   return (
-    <div>
+    <NativeAIControls busy={nativeAIRequest.busy} onCancel={nativeAIRequest.cancel} context="Regulatory Compliance"><div>
       <div className="page-header">
         <div>
           <h1 className="page-title">AI Compliance Assistant</h1>
@@ -114,7 +121,7 @@ const AIAssistant = () => {
                   whiteSpace: 'pre-wrap',
                   lineHeight: '1.5'
                 }}>
-                  {message.content}
+                  {message.role === 'assistant' ? <AIReport response={message.content} /> : message.content}
                 </div>
               </div>
             </div>
@@ -147,7 +154,7 @@ const AIAssistant = () => {
 
         {/* Input */}
         <div style={{ borderTop: '1px solid #e5e7eb', padding: '16px', display: 'flex', gap: '12px' }}>
-          <textarea
+          <textarea data-ai-field="input"
             className="form-input"
             placeholder="Ask me anything about compliance..."
             value={input}
@@ -173,7 +180,7 @@ const AIAssistant = () => {
           50% { opacity: 1; }
         }
       `}</style>
-    </div>
+    </div></NativeAIControls>
   );
 };
 

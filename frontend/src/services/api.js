@@ -209,7 +209,7 @@ export const usersAPI = {
 };
 
 export const aiAPI = {
-  chat: (message, history) => api.post('/ai/chat', { message, conversationHistory: history }),
+  chat: (message, history, nativeRequestOptions = {}) => api.post('/ai/chat', { message, conversationHistory: history }, nativeRequestOptions),
   analyzeRisk: (data, context) => api.post('/ai/analyze-risk', { regulationData: data, companyContext: context }),
   generatePolicy: (type, requirements) => api.post('/ai/generate-policy', { policyType: type, requirements }),
   analyzeDocument: (content, context) => api.post('/ai/analyze-document', { documentContent: content, regulationContext: context }),

@@ -28,9 +28,16 @@ const Login = () => {
     setLoading(false);
   };
 
+  const demoEmail = process.env.REACT_APP_DEMO_EMAIL;
+  const demoPassword = process.env.REACT_APP_DEMO_PASSWORD;
+  const demoAvailable = process.env.NODE_ENV !== 'production' &&
+    process.env.REACT_APP_ENABLE_DEMO_CREDENTIAL_AUTOFILL === 'true' &&
+    Boolean(demoEmail && demoPassword);
   const handleDemoLogin = () => {
-    setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
-    setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
+    if (!demoAvailable) return;
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError('');
   };
 
   return (
@@ -54,10 +61,11 @@ const Login = () => {
           <p>Sign in to access your compliance dashboard</p>
         </div>
 
-        <button type="button" className="btn demo-btn" onClick={handleDemoLogin}>
+        <button type="button" className="btn demo-btn" onClick={handleDemoLogin} disabled={!demoAvailable}>
           <User size={18} />
-          Auto Fill Demo Credentials
+          Fill demo credentials
         </button>
+        {!demoAvailable && <p role="status">Demo credentials are not configured for this local session. Sign in with your account.</p>}
 
         {error && (
           <div className="alert alert-danger">
@@ -126,10 +134,6 @@ const Login = () => {
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.8rem', color: '#6b7280' }}>
-          <p>Demo credentials:</p>
-          <p><strong>admin@compliance.com</strong> / <strong>password123</strong></p>
-        </div>
       </div>
     </div>
   );

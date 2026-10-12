@@ -1,9 +1,14 @@
+import AIReport from '../components/AIReport';
+
+import FullAIExamples, { useFullAIExamples } from "../components/FullAIExamples.jsx";
 import React, { useState } from 'react';
 import { Sparkles, AlertTriangle, Loader } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const VendorRiskScorer = () => {
+  const fullAIExamples = useFullAIExamples();
+
   const [vendorName, setVendorName] = useState('');
   const [services, setServices] = useState('');
   const [dataAccess, setDataAccess] = useState('');
@@ -56,7 +61,7 @@ const VendorRiskScorer = () => {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-full-ai-workspace="VendorRiskScorer"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
           <div className="form-group">
             <label>Vendor name</label>
             <input
@@ -64,7 +69,7 @@ const VendorRiskScorer = () => {
               className="form-input"
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: vendorName, change: (e) => setVendorName(e.target.value), label: "vendorName", manual: false, json: false, sample: '' }, "p1-2021", undefined)}
             />
           </div>
           <div className="form-group">
@@ -74,7 +79,7 @@ const VendorRiskScorer = () => {
               rows={3}
               value={services}
               onChange={(e) => setServices(e.target.value)}
-              placeholder="e.g. cloud hosting, payment processing, customer support outsourcing..."
+              placeholder="e.g. cloud hosting, payment processing, customer support outsourcing..." data-full-ai-field={fullAIExamples.bind({ current: services, change: (e) => setServices(e.target.value), label: "services", manual: false, json: false, sample: '' }, "p1-2337", undefined)}
             />
           </div>
           <div className="form-group">
@@ -84,7 +89,7 @@ const VendorRiskScorer = () => {
               rows={2}
               value={dataAccess}
               onChange={(e) => setDataAccess(e.target.value)}
-              placeholder="e.g. PII, PHI, financial data, anonymized analytics only..."
+              placeholder="e.g. PII, PHI, financial data, anonymized analytics only..." data-full-ai-field={fullAIExamples.bind({ current: dataAccess, change: (e) => setDataAccess(e.target.value), label: "dataAccess", manual: false, json: false, sample: '' }, "p1-2726", undefined)}
             />
           </div>
           <div className="form-group">
@@ -94,7 +99,7 @@ const VendorRiskScorer = () => {
               className="form-input"
               value={certifications}
               onChange={(e) => setCertifications(e.target.value)}
-              placeholder="e.g. SOC 2 Type II, ISO 27001"
+              placeholder="e.g. SOC 2 Type II, ISO 27001" data-full-ai-field={fullAIExamples.bind({ current: certifications, change: (e) => setCertifications(e.target.value), label: "certifications", manual: false, json: false, sample: '' }, "p1-3104", undefined)}
             />
           </div>
           <div className="form-group">
@@ -104,7 +109,7 @@ const VendorRiskScorer = () => {
               className="form-input"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              placeholder="e.g. EU, US, India"
+              placeholder="e.g. EU, US, India" data-full-ai-field={fullAIExamples.bind({ current: region, change: (e) => setRegion(e.target.value), label: "region", manual: false, json: false, sample: '' }, "p1-3467", undefined)}
             />
           </div>
           {error && (
@@ -118,57 +123,7 @@ const VendorRiskScorer = () => {
         </form>
       </div>
 
-      {result && (
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Risk Score</h2>
-
-          {(result.overallScore != null || result.overall_score != null || result.riskLevel) && (
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', padding: 12, background: '#f9fafb', borderRadius: 8, marginBottom: 12 }}>
-              {(result.overallScore != null || result.overall_score != null) && (
-                <div style={{ width: 80, height: 80, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef2ff', border: '4px solid #c7d2fe' }}>
-                  <span style={{ fontSize: 24, fontWeight: 700, color: '#4338ca' }}>{result.overallScore ?? result.overall_score}</span>
-                </div>
-              )}
-              <div>
-                {(result.riskLevel || result.risk_level) && (
-                  <p style={{ fontSize: 18, fontWeight: 600, color: riskColor(result.riskLevel || result.risk_level), margin: 0 }}>
-                    Risk: {result.riskLevel || result.risk_level}
-                  </p>
-                )}
-                {result.reassessment_cadence && (
-                  <p style={{ margin: '4px 0', color: '#6b7280' }}>Reassessment: {result.reassessment_cadence}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {result.summary && <p>{result.summary}</p>}
-
-          {result.dimensions && typeof result.dimensions === 'object' && (
-            <div style={{ marginBottom: 12 }}>
-              <h3>Dimensions</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-                {Object.entries(result.dimensions).map(([k, v]) => (
-                  <div key={k} style={{ padding: 10, border: '1px solid #e5e7eb', borderRadius: 6 }}>
-                    <div style={{ fontSize: 12, color: '#6b7280', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</div>
-                    <div style={{ fontSize: 18, fontWeight: 600 }}>{typeof v === 'object' ? (v.score ?? JSON.stringify(v)) : String(v)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {Array.isArray(result.findings) && result.findings.length > 0 && (
-            <SimpleList title="Findings" items={result.findings} />
-          )}
-          {Array.isArray(result.mitigations) && result.mitigations.length > 0 && (
-            <SimpleList title="Mitigations" items={result.mitigations} />
-          )}
-          {Array.isArray(result.recommendations) && result.recommendations.length > 0 && (
-            <SimpleList title="Recommendations" items={result.recommendations} />
-          )}
-        </div>
-      )}
+      {result !== null && result !== undefined && <AIReport response={result} title="Vendor Risk Scorer" />}
     </div>
   );
 };

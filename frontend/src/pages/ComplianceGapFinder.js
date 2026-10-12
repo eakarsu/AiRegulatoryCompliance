@@ -1,9 +1,14 @@
+import AIReport from '../components/AIReport';
+
+import FullAIExamples, { useFullAIExamples } from "../components/FullAIExamples.jsx";
 import React, { useState } from 'react';
 import { Sparkles, AlertTriangle, Loader } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const ComplianceGapFinder = () => {
+  const fullAIExamples = useFullAIExamples();
+
   const [framework, setFramework] = useState('SOC 2');
   const [currentControls, setCurrentControls] = useState('');
   const [orgContext, setOrgContext] = useState('');
@@ -45,7 +50,7 @@ const ComplianceGapFinder = () => {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-full-ai-workspace="ComplianceGapFinder"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
           <div className="form-group">
             <label>Target framework</label>
             <input
@@ -54,7 +59,7 @@ const ComplianceGapFinder = () => {
               value={framework}
               onChange={(e) => setFramework(e.target.value)}
               placeholder="e.g. SOC 2, ISO 27001, HIPAA, GDPR"
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: framework, change: (e) => setFramework(e.target.value), label: "framework", manual: false, json: false, sample: 'SOC 2' }, "p1-1715", undefined)}
             />
           </div>
           <div className="form-group">
@@ -65,7 +70,7 @@ const ComplianceGapFinder = () => {
               value={currentControls}
               onChange={(e) => setCurrentControls(e.target.value)}
               placeholder="Describe controls already in place..."
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: currentControls, change: (e) => setCurrentControls(e.target.value), label: "currentControls", manual: false, json: false, sample: '' }, "p1-2103", undefined)}
             />
           </div>
           <div className="form-group">
@@ -75,7 +80,7 @@ const ComplianceGapFinder = () => {
               rows={3}
               value={orgContext}
               onChange={(e) => setOrgContext(e.target.value)}
-              placeholder="Industry, size, data types, customers..."
+              placeholder="Industry, size, data types, customers..." data-full-ai-field={fullAIExamples.bind({ current: orgContext, change: (e) => setOrgContext(e.target.value), label: "orgContext", manual: false, json: false, sample: '' }, "p1-2500", undefined)}
             />
           </div>
           {error && (
@@ -89,37 +94,7 @@ const ComplianceGapFinder = () => {
         </form>
       </div>
 
-      {result && (
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Gap Report</h2>
-          {result.summary && <p>{result.summary}</p>}
-
-          {Array.isArray(result.gaps) && result.gaps.length > 0 && (
-            <Section title="Gaps">
-              {result.gaps.map((g, i) => (
-                <div key={i} style={{ padding: 10, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <strong>{g.control || g.requirement || g.name || `Gap ${i + 1}`}</strong>
-                    {g.severity && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 12, background: '#fef3c7', color: '#92400e' }}>{g.severity}</span>}
-                  </div>
-                  {g.description && <p style={{ marginTop: 4, color: '#4b5563' }}>{g.description}</p>}
-                  {g.recommendation && <p style={{ marginTop: 4, color: '#1d4ed8', fontSize: 13 }}>Suggestion: {g.recommendation}</p>}
-                </div>
-              ))}
-            </Section>
-          )}
-
-          {Array.isArray(result.in_place) && result.in_place.length > 0 && (
-            <SimpleList title="Controls In Place" items={result.in_place} />
-          )}
-          {Array.isArray(result.partial) && result.partial.length > 0 && (
-            <SimpleList title="Partial Coverage" items={result.partial} />
-          )}
-          {Array.isArray(result.recommendations) && result.recommendations.length > 0 && (
-            <SimpleList title="Recommendations" items={result.recommendations} />
-          )}
-        </div>
-      )}
+      {result !== null && result !== undefined && <AIReport response={result} title="Compliance Gap Finder" />}
     </div>
   );
 };

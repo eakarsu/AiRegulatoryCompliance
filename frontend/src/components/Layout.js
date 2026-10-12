@@ -1,3 +1,4 @@
+import AIReportLibrary from "./AIReportLibrary";
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -190,7 +191,7 @@ const Layout = ({ children }) => {
             </div>
           </div>
         </nav>
-      </aside>
+      <AIReportLibrary /></aside>
 
       <main className="main-content">
         {children}

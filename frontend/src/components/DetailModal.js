@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Edit2, Trash2, Save, XCircle, Bot, Sparkles, ChevronRight } from 'lucide-react';
-import AIResultDisplay from './AIResultDisplay';
+import AIReport from './AIReport';
 
 // Helper function to render JSON values beautifully
 const renderJsonValue = (value, depth = 0) => {
@@ -438,9 +438,9 @@ const DetailModal = ({
                 </div>
               )}
 
-              {(aiResult || aiLoading) && (
-                <AIResultDisplay
-                  result={aiResult}
+              {(aiResult !== null && aiResult !== undefined || aiLoading) && (
+                <AIReport
+                  response={aiResult}
                   loading={aiLoading}
                   title="AI Analysis Results"
                 />

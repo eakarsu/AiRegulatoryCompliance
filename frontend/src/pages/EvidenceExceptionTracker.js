@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AIReport from '../components/AIReport';
 
 export default function EvidenceExceptionTracker() {
   const [data, setData] = useState({ summary: {}, exceptions: [] });
@@ -31,7 +32,7 @@ export default function EvidenceExceptionTracker() {
           <button className="btn-primary" onClick={() => resolvePlan(item.id)}>Create resolve plan</button>
         </div>
       ))}
-      {plan && <pre className="card">{JSON.stringify(plan, null, 2)}</pre>}
+      {plan !== null && <AIReport response={plan} title="Evidence resolution plan" />}
     </div>
   );
 }

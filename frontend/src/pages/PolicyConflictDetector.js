@@ -1,9 +1,14 @@
+import AIReport from '../components/AIReport';
+
+import FullAIExamples, { useFullAIExamples } from "../components/FullAIExamples.jsx";
 import React, { useState } from 'react';
 import { Sparkles, AlertTriangle, Loader } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const PolicyConflictDetector = () => {
+  const fullAIExamples = useFullAIExamples();
+
   const [scope, setScope] = useState('organization-wide');
   const [policiesText, setPoliciesText] = useState(
     'Acceptable Use Policy: All employees must use multi-factor authentication on company systems.\n---\nRemote Work Policy: Remote employees may use personal devices without MFA when accessing internal portals.'
@@ -63,7 +68,7 @@ const PolicyConflictDetector = () => {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-full-ai-workspace="PolicyConflictDetector"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
           <div className="form-group">
             <label>Scope</label>
             <input
@@ -71,7 +76,7 @@ const PolicyConflictDetector = () => {
               className="form-input"
               value={scope}
               onChange={(e) => setScope(e.target.value)}
-              placeholder="e.g. organization-wide, EU operations, security policies"
+              placeholder="e.g. organization-wide, EU operations, security policies" data-full-ai-field={fullAIExamples.bind({ current: scope, change: (e) => setScope(e.target.value), label: "scope", manual: false, json: false, sample: 'organization-wide' }, "p1-2488", undefined)}
             />
           </div>
           <div className="form-group">
@@ -82,7 +87,7 @@ const PolicyConflictDetector = () => {
               value={policiesText}
               onChange={(e) => setPoliciesText(e.target.value)}
               placeholder={'Policy Name: full text...\n---\nAnother Policy: full text...'}
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: policiesText, change: (e) => setPoliciesText(e.target.value), label: "policiesText", manual: false, json: false, sample: 'Acceptable Use Policy: All employees must use multi-factor authentication on company systems.\n---\nRemote Work Policy: Remote employees may use personal devices without MFA when accessing internal portals.' }, "p1-2895", undefined)}
             />
             <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
               Tip: prefix each block with "Policy Name:" — the first line up to the colon is used as the policy name.
@@ -99,39 +104,7 @@ const PolicyConflictDetector = () => {
         </form>
       </div>
 
-      {result && (
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Conflict Report</h2>
-          {result.summary && <p>{result.summary}</p>}
-          {typeof result.conflict_count === 'number' && (
-            <p style={{ color: '#374151', fontWeight: 600 }}>{result.conflict_count} conflict(s) detected</p>
-          )}
-
-          {Array.isArray(result.conflicts) && result.conflicts.length > 0 && (
-            <Section title="Conflicts">
-              {result.conflicts.map((c, i) => (
-                <div key={i} style={{ padding: 10, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <strong>{c.topic || c.type || `Conflict ${i + 1}`}</strong>
-                    {c.severity && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 12, background: '#fee2e2', color: '#991b1b' }}>{c.severity}</span>}
-                  </div>
-                  {c.type && <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Type: {c.type}</p>}
-                  {Array.isArray(c.policies_involved) && c.policies_involved.length > 0 && (
-                    <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Policies: {c.policies_involved.join(', ')}</p>
-                  )}
-                  {c.conflict_description && <p style={{ marginTop: 4, color: '#4b5563' }}>{c.conflict_description}</p>}
-                  {c.recommended_resolution && <p style={{ marginTop: 4, color: '#1d4ed8', fontSize: 13 }}>Resolution: {c.recommended_resolution}</p>}
-                  {c.suggested_owner_role && <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Owner: {c.suggested_owner_role}</p>}
-                </div>
-              ))}
-            </Section>
-          )}
-
-          {Array.isArray(result.priority_resolutions) && result.priority_resolutions.length > 0 && (
-            <SimpleList title="Priority Resolutions" items={result.priority_resolutions} />
-          )}
-        </div>
-      )}
+      {result !== null && result !== undefined && <AIReport response={result} title="Policy Conflict Detector" />}
     </div>
   );
 };

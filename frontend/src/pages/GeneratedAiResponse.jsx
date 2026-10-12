@@ -207,7 +207,8 @@ function Confidence({ value }) {
 }
 
 function Primitive({ value }) {
-  if (value == null || value === '') return <span style={{ color: '#64748b' }}>Not provided</span>;
+  if (value == null) return <span style={{ color: '#64748b' }}>Not provided</span>;
+  if (value === '') return <span style={{ color: '#64748b' }}>Empty string</span>;
   if (typeof value === 'boolean') return <span style={{ color: value ? '#047857' : '#b45309', fontWeight: 700 }}>{value ? 'Yes' : 'No'}</span>;
   return <Narrative text={String(value)} />;
 }
@@ -287,7 +288,7 @@ function toPlainText(value, depth = 0) {
 export default function GeneratedAiResponse({ response }) {
   const [copied, setCopied] = useState(false);
   const parsed = useMemo(() => parseAiValue(response), [response]);
-  if (!parsed) return null;
+  if (parsed === null || parsed === undefined) return null;
 
   const payload = typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : { result: parsed };
   const content = unwrapContent(payload);

@@ -1,9 +1,14 @@
+import AIReport from '../components/AIReport';
+
+import FullAIExamples, { useFullAIExamples } from "../components/FullAIExamples.jsx";
 import React, { useState } from 'react';
 import { Sparkles, AlertTriangle, Loader } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const ControlEffectivenessAssessment = () => {
+  const fullAIExamples = useFullAIExamples();
+
   const [controlsText, setControlsText] = useState(
     'C-001 | Multi-factor authentication required for all admin accounts | implemented 2023-09 | last tested 2024-08\nC-002 | Encryption at rest for production databases (AES-256) | implemented 2022-04 | last tested 2024-06\nC-003 | Quarterly access reviews | implemented 2021-01 | last review skipped Q1 2024'
   );
@@ -63,7 +68,7 @@ const ControlEffectivenessAssessment = () => {
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-full-ai-workspace="ControlEffectivenessAssessment"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
           <div className="form-group">
             <label>Controls (one per line: ID | Name | Notes)</label>
             <textarea
@@ -72,7 +77,7 @@ const ControlEffectivenessAssessment = () => {
               value={controlsText}
               onChange={(e) => setControlsText(e.target.value)}
               placeholder={'C-001 | MFA on admin accounts | implemented 2023-09\nC-002 | Encryption at rest | implemented 2022-04'}
-              required
+              required data-full-ai-field={fullAIExamples.bind({ current: controlsText, change: (e) => setControlsText(e.target.value), label: "controlsText", manual: false, json: false, sample: 'C-001 | Multi-factor authentication required for all admin accounts | implemented 2023-09 | last tested 2024-08\nC-002 | Encryption at rest for production databases (AES-256) | implemented 2022-04 | last tested 2024-06\nC-003 | Quarterly access reviews | implemented 2021-01 | last review skipped Q1 2024' }, "p1-2723", undefined)}
             />
           </div>
           <div className="form-group">
@@ -82,7 +87,7 @@ const ControlEffectivenessAssessment = () => {
               rows={3}
               value={evidenceContext}
               onChange={(e) => setEvidenceContext(e.target.value)}
-              placeholder="Recent audit period, incidents, ticket trends..."
+              placeholder="Recent audit period, incidents, ticket trends..." data-full-ai-field={fullAIExamples.bind({ current: evidenceContext, change: (e) => setEvidenceContext(e.target.value), label: "evidenceContext", manual: false, json: false, sample: 'SOC 2 Type II audit period: last 12 months. 2 incidents related to dormant credentials.' }, "p1-3200", undefined)}
             />
           </div>
           {error && (
@@ -96,51 +101,7 @@ const ControlEffectivenessAssessment = () => {
         </form>
       </div>
 
-      {result && (
-        <div className="card">
-          <h2 style={{ marginTop: 0 }}>Effectiveness Report</h2>
-          {result.summary && <p>{result.summary}</p>}
-          {typeof result.overall_effectiveness_score === 'number' && (
-            <p style={{ color: '#374151', fontWeight: 600 }}>
-              Overall effectiveness: {result.overall_effectiveness_score}/100
-            </p>
-          )}
-
-          {Array.isArray(result.control_assessments) && result.control_assessments.length > 0 && (
-            <Section title="Per-Control Assessment">
-              {result.control_assessments.map((c, i) => (
-                <div key={i} style={{ padding: 10, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <strong>{c.control_id || `C-${i + 1}`}: {c.control_name || ''}</strong>
-                    {c.residual_risk && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 12, background: '#fef3c7', color: '#92400e' }}>{c.residual_risk}</span>}
-                  </div>
-                  {(typeof c.design_effectiveness === 'number' || typeof c.operational_effectiveness === 'number') && (
-                    <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>
-                      Design: {c.design_effectiveness ?? '-'} / Operational: {c.operational_effectiveness ?? '-'}
-                    </p>
-                  )}
-                  {c.evidence_quality && <p style={{ marginTop: 4, fontSize: 13, color: '#6b7280' }}>Evidence quality: {c.evidence_quality}</p>}
-                  {c.gaps && <p style={{ marginTop: 4, color: '#4b5563' }}>Gaps: {typeof c.gaps === 'string' ? c.gaps : JSON.stringify(c.gaps)}</p>}
-                  {Array.isArray(c.improvement_recommendations) && c.improvement_recommendations.length > 0 && (
-                    <ul style={{ marginTop: 6, paddingLeft: 20, color: '#1d4ed8', fontSize: 13 }}>
-                      {c.improvement_recommendations.map((r, j) => (
-                        <li key={j}>{typeof r === 'string' ? r : JSON.stringify(r)}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </Section>
-          )}
-
-          {Array.isArray(result.top_weaknesses) && result.top_weaknesses.length > 0 && (
-            <SimpleList title="Top Weaknesses" items={result.top_weaknesses} />
-          )}
-          {Array.isArray(result.strongest_controls) && result.strongest_controls.length > 0 && (
-            <SimpleList title="Strongest Controls" items={result.strongest_controls} />
-          )}
-        </div>
-      )}
+      {result !== null && result !== undefined && <AIReport response={result} title="Control Effectiveness Assessment" />}
     </div>
   );
 };
