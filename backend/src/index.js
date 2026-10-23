@@ -102,6 +102,7 @@ app.use('/api/training-tracker', trainingTrackerRoutes);
 app.use('/api/privacy-policy-generator', privacyPolicyGeneratorRoutes);
 app.use('/api/compliance-checker', complianceCheckerRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/tasks', require('./routes/featurePack').createRouter({authenticate: require('./middleware/auth').authMiddleware}));
 
 if (process.env.ENABLE_GENERATED_FEATURES === 'true' && process.env.NODE_ENV !== 'production') {
   app.use('/api/generated/custom-views', require('./routes/customViews'));
